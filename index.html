@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOTO Finance — Dr. Thanakorn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter','Sarabun',sans-serif; box-sizing: border-box; }
+    body { background: #070c18; color: #fff; min-height: 100vh; }
+
+    .card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 16px; }
+    .card-sm { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; }
+
+    .tab { padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: rgba(255,255,255,.45); border: none; background: transparent; transition: all .2s; white-space: nowrap; }
+    .tab:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .tab.active { background: linear-gradient(135deg,#3b82f6,#6366f1); color: #fff; }
+
+    .btn { padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; border: none; transition: opacity .2s; }
+    .btn-blue  { background: linear-gradient(135deg,#3b82f6,#6366f1); color: #fff; }
+    .btn-blue:hover { opacity: .85; }
+    .btn-ghost { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
+    .btn-red   { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.2); color: #f87171; padding: 3px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+
+    input[type="number"], input[type="text"], input[type="date"], select {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+      color: #fff; border-radius: 8px; padding: 8px 10px; width: 100%; font-size: 13px; transition: border-color .2s;
+    }
+    input[type="date"] { color-scheme: dark; }
+    input:focus, select:focus { outline: none; border-color: #3b82f6; background: rgba(59,130,246,.07); }
+    input::placeholder { color: rgba(255,255,255,.2); }
+    select option { background: #1e293b; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .metric { padding: 18px 20px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); }
+
+    .prog-track { height: 5px; border-radius: 3px; background: rgba(255,255,255,.07); overflow: hidden; margin-top: 5px; }
+    .prog-fill  { height: 100%; border-radius: 3px; transition: width .4s ease; }
+
+    /* Transaction list styles */
+    .date-group-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0 6px; border-bottom: 1px solid rgba(255,255,255,.07);
+      font-size: 12px; font-weight: 600; color: rgba(255,255,255,.55);
+      position: sticky; top: 0; background: rgba(7,12,24,.95); z-index: 1;
+    }
+    .txn-row {
+      display: flex; align-items: center; gap: 8px; padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,.04); font-size: 13px;
+    }
+    .txn-row:last-child { border-bottom: none; }
+    .txn-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+
+    .badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+    .tbl th, .tbl td { padding: 9px 8px; }
+    .tbl th { text-align: left; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.35); border-bottom: 1px solid rgba(255,255,255,.06); }
+    .tbl tr { border-bottom: 1px solid rgba(255,255,255,.04); }
+    .tbl tr:last-child { border-bottom: none; }
+
+    @media (max-width: 700px) {
+      .r2col  { grid-template-columns: 1fr !important; }
+      .r3col  { grid-template-columns: 1fr !important; }
+      .charts-row { grid-template-columns: 1fr !important; }
+      .hide-sm { display: none !important; }
+      .add-form-grid { grid-template-columns: 1fr 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header style="position:sticky;top:0;z-index:50;background:rgba(7,12,24,.93);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06);">
+  <div style="max-width:1200px;margin:0 auto;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">💊</div>
+      <div>
+        <div style="font-weight:700;font-size:15px;line-height:1.2;">TOTO Finance</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.38);">Dr. Thanakorn · ศัลยแพทย์ออร์โธปิดิกส์ · ร้อยเอ็ด</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div id="hdrMonth" style="font-size:13px;font-weight:500;color:rgba(255,255,255,.5);"></div>
+      <div id="sync-dot" title="ไม่ได้ sync" style="width:8px;height:8px;border-radius:50%;background:#64748b;flex-shrink:0;transition:background .3s;"></div>
+      <div id="sync-label" style="font-size:11px;color:rgba(255,255,255,.3);">Local only</div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<div style="max-width:1200px;margin:0 auto;padding:12px 16px 0;">
+  <div style="display:flex;gap:4px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
+    <button class="tab active" onclick="go('dashboard',this)">📊 ภาพรวม</button>
+    <button class="tab"        onclick="go('income',this)"   >💰 รายรับ</button>
+    <button class="tab"        onclick="go('expenses',this)" >🛒 รายจ่าย</button>
+    <button class="tab"        onclick="go('tax',this)"      >🧾 ภาษี</button>
+    <button class="tab"        onclick="go('invest',this)"   >📈 การลงทุน</button>
+    <button class="tab"        onclick="go('settings',this)" >⚙️ ตั้งค่า Sync</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<main style="max-width:1200px;margin:0 auto;padding:18px 16px 60px;">
+
+
+<!-- ══════════════════════════════════════════════════════════
+     DASHBOARD
+════════════════════════════════════════════════════════════ -->
+<section id="s-dashboard" class="section active">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <h2 style="font-size:18px;font-weight:700;">ภาพรวมการเงิน</h2>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="tab" onclick="shiftMonth(-1)" style="padding:5px 12px;">‹</button>
+      <span id="d-mth" style="font-size:13px;font-weight:600;padding:0 8px;min-width:118px;text-align:center;"></span>
+      <button class="tab" onclick="shiftMonth(1)"  style="padding:5px 12px;">›</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin-bottom:16px;">
+    <div class="metric" style="border-top:3px solid #22c55e;">
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">รายรับเดือนนี้</div>
+      <div id="kpi-i" style="font-size:24px;font-weight:800;color:#22c55e;">฿0</div>
+      <div id="kpi-i2" style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;"></div>
+    </div>
+    <div class="metric" style="border-top:3px solid #ef4444;">
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">รายจ่ายเดือนนี้</div>
+      <div id="kpi-e" style="font-size:24px;font-weight:800;color:#ef4444;">฿0</div>
+      <div id="kpi-e2" style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;"></div>
+    </div>
+    <div class="metric" style="border-top:3px solid #3b82f6;">
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">เงินออมสุทธิ</div>
+      <div id="kpi-s" style="font-size:24px;font-weight:800;">฿0</div>
+      <div id="kpi-s2" style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;"></div>
+    </div>
+    <div class="metric" style="border-top:3px solid #a855f7;">
+      <div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">ประมาณภาษี (YTD)</div>
+      <div id="kpi-t" style="font-size:24px;font-weight:800;color:#a855f7;">฿0</div>
+      <div id="kpi-t2" style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;"></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;" class="charts-row">
+    <div class="card" style="padding:18px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;">รายรับ vs รายจ่าย · 6 เดือน</div>
+      <canvas id="barChart" style="max-height:210px;"></canvas>
+    </div>
+    <div class="card" style="padding:18px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;">สัดส่วนรายจ่าย</div>
+      <canvas id="pieChart" style="max-height:170px;"></canvas>
+      <div id="pie-leg" style="margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="r2col">
+    <div class="card" style="padding:20px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px;">สรุปปีนี้ · Year-to-Date</div>
+      <div style="display:flex;flex-direction:column;gap:9px;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">รายรับรวม</span><b style="color:#22c55e;" id="ytd-i">฿0</b></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">รายจ่ายรวม</span><b style="color:#ef4444;" id="ytd-e">฿0</b></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">เงินออม</span><b id="ytd-s">฿0</b></div>
+        <div style="height:1px;background:rgba(255,255,255,.07);"></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">ประมาณภาษี</span><b style="color:#a855f7;" id="ytd-t">฿0</b></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">คงเหลือหลังภาษี</span><b id="ytd-net">฿0</b></div>
+      </div>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:14px;">พอร์ตการลงทุน</div>
+      <div id="d-port"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     INCOME
+════════════════════════════════════════════════════════════ -->
+<section id="s-income" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <h2 style="font-size:18px;font-weight:700;">รายรับ</h2>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="tab" onclick="shiftMonth(-1)" style="padding:5px 12px;">‹</button>
+      <span id="i-mth" style="font-size:13px;font-weight:600;padding:0 8px;min-width:118px;text-align:center;"></span>
+      <button class="tab" onclick="shiftMonth(1)"  style="padding:5px 12px;">›</button>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  <div class="card" style="padding:16px;margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:10px;">✏️ เพิ่มรายการรายรับ</div>
+    <div style="display:grid;grid-template-columns:140px 1fr 120px 1fr auto;gap:8px;align-items:end;" class="add-form-grid">
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">วันที่</label>
+        <input type="date" id="iadd-date">
+      </div>
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">หมวดหมู่</label>
+        <select id="iadd-cat"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">จำนวน ฿</label>
+        <input type="number" id="iadd-amt" placeholder="0" min="0" onkeydown="if(event.key==='Enter')addTxn('income')">
+      </div>
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">รายละเอียด (ไม่บังคับ)</label>
+        <input type="text" id="iadd-note" placeholder="เช่น เงินเดือนเมษายน" onkeydown="if(event.key==='Enter')addTxn('income')">
+      </div>
+      <button class="btn btn-blue" onclick="addTxn('income')" style="white-space:nowrap;">+ เพิ่ม</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;" class="r2col">
+    <!-- Transaction list -->
+    <div class="card" style="padding:18px;max-height:620px;overflow-y:auto;">
+      <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:10px;">รายการทั้งหมดในเดือนนี้</div>
+      <div id="inc-list"></div>
+    </div>
+    <!-- Summary -->
+    <div class="card" style="padding:18px;align-self:start;">
+      <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:12px;">สรุปรายรับ</div>
+      <div id="inc-sum" style="display:flex;flex-direction:column;gap:9px;"></div>
+      <div style="height:1px;background:rgba(255,255,255,.07);margin:14px 0;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;">
+        <span>รวม</span><span style="color:#22c55e;" id="inc-tot">฿0</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     EXPENSES
+════════════════════════════════════════════════════════════ -->
+<section id="s-expenses" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <h2 style="font-size:18px;font-weight:700;">รายจ่าย</h2>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <button class="tab" onclick="shiftMonth(-1)" style="padding:5px 12px;">‹</button>
+      <span id="e-mth" style="font-size:13px;font-weight:600;padding:0 8px;min-width:118px;text-align:center;"></span>
+      <button class="tab" onclick="shiftMonth(1)"  style="padding:5px 12px;">›</button>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  <div class="card" style="padding:16px;margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:10px;">✏️ เพิ่มรายการรายจ่าย</div>
+    <div style="display:grid;grid-template-columns:140px 1fr 120px 1fr auto;gap:8px;align-items:end;" class="add-form-grid">
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">วันที่</label>
+        <input type="date" id="eadd-date">
+      </div>
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">หมวดหมู่</label>
+        <select id="eadd-cat"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">จำนวน ฿</label>
+        <input type="number" id="eadd-amt" placeholder="0" min="0" onkeydown="if(event.key==='Enter')addTxn('expense')">
+      </div>
+      <div>
+        <label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">รายละเอียด (ไม่บังคับ)</label>
+        <input type="text" id="eadd-note" placeholder="เช่น อาหารเย็น ร้านส้มตำ" onkeydown="if(event.key==='Enter')addTxn('expense')">
+      </div>
+      <button class="btn btn-blue" onclick="addTxn('expense')" style="white-space:nowrap;">+ เพิ่ม</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;" class="r2col">
+    <!-- Transaction list -->
+    <div class="card" style="padding:18px;max-height:620px;overflow-y:auto;">
+      <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:10px;">รายการทั้งหมดในเดือนนี้</div>
+      <div id="exp-list"></div>
+    </div>
+    <!-- Summary -->
+    <div class="card" style="padding:18px;align-self:start;">
+      <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.45);margin-bottom:12px;">สรุปรายจ่าย</div>
+      <div id="exp-sum" style="display:flex;flex-direction:column;gap:9px;"></div>
+      <div style="height:1px;background:rgba(255,255,255,.07);margin:14px 0;"></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;">
+        <span>รวม</span><span style="color:#ef4444;" id="exp-tot">฿0</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAX
+════════════════════════════════════════════════════════════ -->
+<section id="s-tax" class="section">
+  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:18px;">
+    <h2 style="font-size:18px;font-weight:700;">คำนวณภาษี</h2>
+    <span style="font-size:12px;color:rgba(255,255,255,.35);">ภาษีเงินได้บุคคลธรรมดา ปีภาษี 2569 (2026)</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="r2col">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="padding:20px;">
+        <div style="font-size:12px;font-weight:600;color:#22c55e;margin-bottom:12px;">รายรับรวมทั้งปี</div>
+        <div id="tax-inc-detail" style="display:flex;flex-direction:column;gap:5px;font-size:13px;margin-bottom:12px;"></div>
+        <div style="display:flex;justify-content:space-between;font-weight:700;font-size:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07);">
+          <span>รายรับรวม</span><span style="color:#22c55e;" id="tax-gross">฿0</span>
+        </div>
+      </div>
+      <div class="card" style="padding:20px;">
+        <div style="font-size:12px;font-weight:600;color:#f59e0b;margin-bottom:6px;">ค่าลดหย่อน · Deductions</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:12px;">กรอกเฉพาะที่มี — อัปเดตผลทันที</div>
+        <div class="card-sm" style="padding:10px;margin-bottom:12px;">
+          <div style="font-size:11px;color:rgba(255,255,255,.38);margin-bottom:7px;">อัตโนมัติ (ไม่ต้องกรอก)</div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.55);margin-bottom:3px;"><span>ค่าใช้จ่าย 50% (max ฿100k)</span><span id="auto-emp" style="color:#f59e0b;">฿100,000</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.55);"><span>ค่าลดหย่อนส่วนตัว</span><span style="color:#f59e0b;">฿60,000</span></div>
+        </div>
+        <div id="ded-form" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="padding:20px;">
+        <div style="font-size:12px;font-weight:600;color:#a855f7;margin-bottom:14px;">ผลการคำนวณ</div>
+        <div id="tax-steps" style="font-size:13px;margin-bottom:14px;"></div>
+        <div style="background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.18);border-radius:12px;padding:14px;margin-bottom:8px;">
+          <div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:5px;">ภาษีที่ต้องชำระทั้งปี</div>
+          <div id="tax-amt" style="font-size:30px;font-weight:800;color:#a855f7;">฿0</div>
+          <div id="tax-eff" style="font-size:12px;color:rgba(255,255,255,.4);margin-top:3px;">Effective rate: 0.00%</div>
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);" id="tax-mth"></div>
+      </div>
+      <div class="card" style="padding:20px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;">บันไดภาษี · Tax Brackets</div>
+        <div id="brackets" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     INVESTMENTS
+════════════════════════════════════════════════════════════ -->
+<section id="s-invest" class="section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+    <h2 style="font-size:18px;font-weight:700;">การลงทุน · Portfolio</h2>
+    <button class="btn btn-blue" onclick="toggleAddInv()">+ เพิ่มการลงทุน</button>
+  </div>
+
+  <div id="add-inv" class="card" style="display:none;padding:20px;margin-bottom:14px;">
+    <div style="font-size:13px;font-weight:600;margin-bottom:14px;">เพิ่มรายการลงทุน</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;" class="r2col">
+      <div><label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">ชื่อการลงทุน</label><input type="text" id="inv-n" placeholder="เช่น หุ้น KBANK"></div>
+      <div><label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">ประเภท</label>
+        <select id="inv-t">
+          <option value="stock">📈 หุ้น (Stock / SET)</option>
+          <option value="mutualfund">🏦 กองทุนรวม</option>
+          <option value="ssf">💚 กองทุน SSF</option>
+          <option value="rmf">🌱 กองทุน RMF</option>
+          <option value="deposit">💰 เงินฝาก / ตราสารหนี้</option>
+          <option value="gold">🥇 ทองคำ</option>
+          <option value="realestate">🏠 อสังหาริมทรัพย์</option>
+          <option value="crypto">₿ คริปโต</option>
+          <option value="other">📦 อื่นๆ</option>
+        </select>
+      </div>
+      <div><label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">ต้นทุน ฿</label><input type="number" id="inv-c" placeholder="0" min="0"></div>
+      <div><label style="font-size:11px;color:rgba(255,255,255,.4);display:block;margin-bottom:4px;">มูลค่าปัจจุบัน ฿</label><input type="number" id="inv-v" placeholder="0" min="0"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" onclick="addInv()">บันทึก</button>
+      <button class="btn btn-ghost" onclick="toggleAddInv()">ยกเลิก</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:14px;">
+    <div class="metric" style="border-top:3px solid #3b82f6;"><div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">มูลค่าพอร์ต</div><div id="pv" style="font-size:22px;font-weight:800;color:#3b82f6;">฿0</div></div>
+    <div class="metric" style="border-top:3px solid #22c55e;"><div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">กำไร/ขาดทุน</div><div id="ppnl" style="font-size:22px;font-weight:800;">฿0</div></div>
+    <div class="metric" style="border-top:3px solid #f59e0b;"><div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">ผลตอบแทน</div><div id="pret" style="font-size:22px;font-weight:800;">0%</div></div>
+    <div class="metric" style="border-top:3px solid #6366f1;"><div style="font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px;">ต้นทุนรวม</div><div id="pcost" style="font-size:22px;font-weight:800;color:rgba(255,255,255,.65);">฿0</div></div>
+  </div>
+  <div class="card" style="padding:20px;"><div id="inv-list"></div></div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SETTINGS / SYNC
+════════════════════════════════════════════════════════════ -->
+<section id="s-settings" class="section">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:18px;">⚙️ ตั้งค่า Sync</h2>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" class="r2col">
+
+    <!-- Setup card -->
+    <div class="card" style="padding:22px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px;">🔗 เชื่อมต่อ JSONBin.io</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:18px;">ฟรี · sync อัตโนมัติทุกอุปกรณ์</div>
+
+      <!-- Step by step -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <div class="card-sm" style="padding:12px;">
+          <div style="font-size:12px;font-weight:600;color:#3b82f6;margin-bottom:6px;">ขั้นที่ 1 — สร้าง Bin</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.7;">
+            1. ไปที่ <b style="color:#fff;">jsonbin.io</b> → สมัคร account ฟรี<br>
+            2. กด <b style="color:#fff;">+ New Bin</b> → ใส่ <code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:4px;">{}</code> → กด <b style="color:#fff;">Create</b><br>
+            3. Copy <b style="color:#fff;">BIN ID</b> จาก URL หรือด้านบนของ bin
+          </div>
+        </div>
+        <div class="card-sm" style="padding:12px;">
+          <div style="font-size:12px;font-weight:600;color:#3b82f6;margin-bottom:6px;">ขั้นที่ 2 — Copy API Key</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.7;">
+            1. กดชื่อ account มุมบนขวา → <b style="color:#fff;">API Keys</b><br>
+            2. Copy <b style="color:#fff;">Master Key</b> (ขึ้นต้นด้วย $2b$...)
+          </div>
+        </div>
+        <div class="card-sm" style="padding:12px;">
+          <div style="font-size:12px;font-weight:600;color:#3b82f6;margin-bottom:6px;">ขั้นที่ 3 — วางด้านล่าง แล้วกด Connect</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5);">ทำครั้งเดียว ทุกเครื่องใช้ key เดียวกัน</div>
+        </div>
+      </div>
+
+      <!-- Inputs -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px;color:rgba(255,255,255,.45);display:block;margin-bottom:4px;">BIN ID</label>
+          <input type="text" id="cfg-binid" placeholder="เช่น 64a1b2c3d4e5f6a7b8c9d0e1">
+        </div>
+        <div>
+          <label style="font-size:11px;color:rgba(255,255,255,.45);display:block;margin-bottom:4px;">Master Key (API Key)</label>
+          <input type="password" id="cfg-apikey" placeholder="$2b$10$...">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-blue" onclick="connectSync()">🔗 Connect</button>
+        <button class="btn btn-ghost" onclick="forcePull()">⬇️ Pull จาก Cloud</button>
+        <button class="btn btn-ghost" onclick="forcePush()">⬆️ Push ขึ้น Cloud</button>
+        <button class="btn-red" style="padding:8px 14px;border-radius:8px;font-size:13px;" onclick="disconnectSync()">ยกเลิก Sync</button>
+      </div>
+    </div>
+
+    <!-- Status card -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="padding:22px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;">สถานะ</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div id="status-dot-big" style="width:12px;height:12px;border-radius:50%;background:#64748b;flex-shrink:0;"></div>
+          <div id="status-text" style="font-size:13px;">ไม่ได้เชื่อมต่อ · Local only</div>
+        </div>
+        <div id="status-detail" style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.6;"></div>
+        <div style="height:1px;background:rgba(255,255,255,.07);margin:14px 0;"></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);">Last sync: <span id="last-sync-time">-</span></div>
+      </div>
+
+      <div class="card" style="padding:22px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">💾 Export / Import (สำรองข้อมูล)</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:12px;">ดาวน์โหลดข้อมูลเป็นไฟล์ หรืออัปโหลดกลับมา</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-ghost" onclick="exportData()">⬇️ Export JSON</button>
+          <label class="btn btn-ghost" style="cursor:pointer;">
+            ⬆️ Import JSON
+            <input type="file" accept=".json" onchange="importData(this)" style="display:none;">
+          </label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const INC_CATS = [
+  { k:'salary',   label:'เงินเดือน',     sub:'Govt. Salary',        icon:'🏥', color:'#22c55e' },
+  { k:'oncall',   label:'เวร / OT',      sub:'On-call & Overtime',  icon:'🌙', color:'#10b981' },
+  { k:'clinic',   label:'คลินิกเอกชน',  sub:'Private Clinic',      icon:'💉', color:'#06b6d4' },
+  { k:'academic', label:'วิชาการ',       sub:'Academic / Teaching', icon:'📚', color:'#3b82f6' },
+  { k:'dividend', label:'เงินปันผล',     sub:'Dividends & Interest',icon:'💵', color:'#f59e0b' },
+  { k:'other',    label:'อื่นๆ',         sub:'Other Income',        icon:'➕', color:'#8b5cf6' },
+];
+
+const EXP_CATS = [
+  { k:'food',       label:'อาหาร',          sub:'Food & Dining',        icon:'🍜', color:'#ef4444' },
+  { k:'transport',  label:'เดินทาง',        sub:'Transportation',       icon:'🚗', color:'#f97316' },
+  { k:'housing',    label:'ที่พัก',         sub:'Rent / Mortgage',      icon:'🏠', color:'#f59e0b' },
+  { k:'utilities',  label:'สาธารณูปโภค',   sub:'Utilities',            icon:'💡', color:'#eab308' },
+  { k:'health',     label:'สุขภาพ',         sub:'Health & Medical',     icon:'💊', color:'#84cc16' },
+  { k:'insurance',  label:'ประกัน',         sub:'Insurance Premiums',   icon:'🛡️', color:'#22c55e' },
+  { k:'education',  label:'CME / การศึกษา', sub:'Education & CME',      icon:'🎓', color:'#06b6d4' },
+  { k:'savings',    label:'ออม/ลงทุน',      sub:'Savings & Investment', icon:'📈', color:'#3b82f6' },
+  { k:'family',     label:'ครอบครัว',       sub:'Family Support',       icon:'👨‍👩‍👧', color:'#6366f1' },
+  { k:'shopping',   label:'ช้อปปิ้ง',      sub:'Shopping',             icon:'🛍️', color:'#8b5cf6' },
+  { k:'entertain',  label:'บันเทิง',        sub:'Entertainment/Travel', icon:'🎮', color:'#a855f7' },
+  { k:'loan',       label:'หนี้ / ผ่อน',   sub:'Loan Repayment',       icon:'💳', color:'#ec4899' },
+  { k:'other',      label:'อื่นๆ',          sub:'Miscellaneous',        icon:'📦', color:'#64748b' },
+];
+
+const DED_FIELDS = [
+  { k:'socialSec',   label:'ประกันสังคม',             sub:'max ฿9,000/ปี',    def:9000  },
+  { k:'lifeIns',     label:'ประกันชีวิต',             sub:'max ฿100,000/ปี',  def:0     },
+  { k:'healthIns',   label:'ประกันสุขภาพ (ตัวเอง)',   sub:'max ฿25,000/ปี',   def:0     },
+  { k:'parentIns',   label:'ประกันสุขภาพ (บิดามารดา)',sub:'max ฿30,000/ปี',   def:0     },
+  { k:'ssf',         label:'กองทุน SSF',              sub:'max ฿200,000/ปี',  def:0     },
+  { k:'rmf',         label:'กองทุน RMF',              sub:'max ฿500,000/ปี',  def:0     },
+  { k:'mortgageInt', label:'ดอกเบี้ยบ้าน',            sub:'max ฿100,000/ปี',  def:0     },
+  { k:'donation',    label:'เงินบริจาค',              sub:'2× สูงสุด 10%',    def:0     },
+];
+
+const INV_TYPES = {
+  stock:{ label:'หุ้น', color:'#3b82f6' }, mutualfund:{ label:'กองทุนรวม', color:'#06b6d4' },
+  ssf:  { label:'SSF',  color:'#22c55e' }, rmf:{ label:'RMF', color:'#10b981' },
+  deposit:{ label:'เงินฝาก', color:'#f59e0b' }, gold:{ label:'ทองคำ', color:'#f59e0b' },
+  realestate:{ label:'อสังหาฯ', color:'#a855f7' }, crypto:{ label:'คริปโต', color:'#f97316' },
+  other:{ label:'อื่นๆ', color:'#64748b' },
+};
+
+const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const now = new Date();
+let cy = now.getFullYear(), cm = now.getMonth();
+let activeSec = 'dashboard';
+
+let D = { transactions:[], deductions:{}, investments:[] };
+
+// loadD and saveD defined below with cloud sync support
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+function todayISO() {
+  const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function mk(y, m) { return `${y}-${String(m+1).padStart(2,'0')}`; }
+function curMk()  { return mk(cy, cm); }
+
+// Filter transactions by type and month prefix
+function getTxns(type, y, m) {
+  const prefix = mk(y, m);
+  return D.transactions.filter(t => t.type===type && t.date.startsWith(prefix));
+}
+function totalTxns(type, y, m) {
+  return getTxns(type, y, m).reduce((s,t)=>s+(+t.amount||0), 0);
+}
+
+// Totals for current view month
+function totalInc(y, m) { return totalTxns('income',  y!==undefined?y:cy, m!==undefined?m:cm); }
+function totalExp(y, m) { return totalTxns('expense', y!==undefined?y:cy, m!==undefined?m:cm); }
+
+// YTD (whole year)
+function ytdInc() { let t=0; for(let m=0;m<12;m++) t+=totalInc(cy,m); return t; }
+function ytdExp() { let t=0; for(let m=0;m<12;m++) t+=totalExp(cy,m); return t; }
+
+function fmt(n) {
+  if(!n||isNaN(n)) return '฿0';
+  const abs=Math.abs(n);
+  const s=abs>=1000000?(abs/1000000).toFixed(2)+'M':abs>=10000?(abs/1000).toFixed(1)+'k':abs.toLocaleString('th-TH');
+  return (n<0?'-':'')+'฿'+s;
+}
+function fmtFull(n) {
+  if(!n||isNaN(n)) return '฿0';
+  return (n<0?'-':'')+'฿'+Math.abs(n).toLocaleString('th-TH');
+}
+function fmtPct(n) { return (n>=0?'+':'')+n.toFixed(2)+'%'; }
+
+// Format Thai date from ISO string
+function fmtDateTH(iso) {
+  const [y,m,d] = iso.split('-').map(Number);
+  return `${d} ${MONTHS_SHORT[m-1]} ${y+543}`;
+}
+
+// Category lookup
+function getCat(type, k) {
+  const cats = type==='income' ? INC_CATS : EXP_CATS;
+  return cats.find(c=>c.k===k) || { k:'other', label:'อื่นๆ', icon:'📦', color:'#64748b' };
+}
+
+// ═══════════════════════════════════════════════════════════
+// THAI PIT TAX CALCULATION
+// ═══════════════════════════════════════════════════════════
+function calcTax(gross) {
+  const ded=D.deductions;
+  const empDed   = Math.min(gross*.5, 100000);
+  const personal = 60000;
+  const social   = Math.min(+ded.socialSec||0, 9000);
+  const lifeIns  = Math.min(+ded.lifeIns||0, 100000);
+  const hlthIns  = Math.min(+ded.healthIns||0, 25000);
+  const lifeHlth = Math.min(lifeIns+hlthIns, 100000);
+  const parentIns= Math.min(+ded.parentIns||0, 30000);
+  const ssf      = Math.min(+ded.ssf||0, gross*.3, 200000);
+  const rmf      = Math.min(+ded.rmf||0, gross*.3, 500000);
+  const ssfRmf   = Math.min(ssf+rmf, 500000);
+  const mortgage = Math.min(+ded.mortgageInt||0, 100000);
+  const totalBefore = empDed+personal+social+lifeHlth+parentIns+ssfRmf+mortgage;
+  const netBefore   = Math.max(0, gross-totalBefore);
+  const donDed   = Math.min((+ded.donation||0)*2, netBefore*.1);
+  const taxable  = Math.max(0, netBefore-donDed);
+  const totalDed = totalBefore+donDed;
+
+  const BKTS=[
+    {min:0,      max:150000,  rate:.00},{min:150000,  max:300000,  rate:.05},
+    {min:300000, max:500000,  rate:.10},{min:500000,  max:750000,  rate:.15},
+    {min:750000, max:1000000, rate:.20},{min:1000000, max:2000000, rate:.25},
+    {min:2000000,max:5000000, rate:.30},{min:5000000, max:Infinity,rate:.35},
+  ];
+  let tax=0;
+  const bkd=BKTS.map(b=>{
+    if(taxable<=b.min) return {...b,amt:0,tax:0};
+    const a=Math.min(taxable,b.max)-b.min, t=a*b.rate; tax+=t;
+    return {...b,amt:a,tax:t};
+  });
+  return { gross,empDed,personal,social,lifeHlth,parentIns,ssfRmf,mortgage,donDed,totalDed,taxable,tax,bkd,
+           effRate:gross>0?tax/gross*100:0 };
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function go(name, el) {
+  activeSec=name;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+name).classList.add('active');
+  el.classList.add('active');
+  render();
+}
+function shiftMonth(d) {
+  cm+=d; if(cm<0){cm=11;cy--;} if(cm>11){cm=0;cy++;}
+  render();
+}
+function render() {
+  updateLabels();
+  if(activeSec==='dashboard') renderDash();
+  if(activeSec==='income')    renderIncome();
+  if(activeSec==='expenses')  renderExpenses();
+  if(activeSec==='tax')       renderTax();
+  if(activeSec==='invest')    renderInvest();
+  if(activeSec==='settings')  renderSettings();
+}
+function updateLabels() {
+  const lbl=`${MONTHS[cm]} ${cy+543}`;
+  ['d-mth','i-mth','e-mth'].forEach(id=>{const e=ge(id);if(e)e.textContent=lbl;});
+  ge('hdrMonth').textContent=lbl;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRANSACTION FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+function addTxn(type) {
+  const prefix = type==='income'?'iadd':'eadd';
+  const date  = ge(prefix+'-date').value;
+  const catK  = ge(prefix+'-cat').value;
+  const amt   = parseFloat(ge(prefix+'-amt').value);
+  const note  = ge(prefix+'-note').value.trim();
+  if (!date)  { alert('กรุณาเลือกวันที่'); return; }
+  if (!amt||amt<=0) { alert('กรุณาใส่จำนวนเงิน'); return; }
+  D.transactions.push({ id:Date.now(), date, type, category:catK, amount:amt, note });
+  saveD();
+  ge(prefix+'-amt').value='';
+  ge(prefix+'-note').value='';
+  // Keep date and category for quick repeat entry
+  if(type==='income')  renderIncome();
+  else                 renderExpenses();
+  // Optionally re-render dashboard if visible — noop
+}
+
+function delTxn(id) {
+  D.transactions = D.transactions.filter(t=>t.id!==id);
+  saveD();
+  if(activeSec==='income')   renderIncome();
+  if(activeSec==='expenses') renderExpenses();
+}
+
+// Group transactions by date (newest first)
+function groupByDate(txns) {
+  const map={};
+  txns.forEach(t=>{ if(!map[t.date]) map[t.date]=[]; map[t.date].push(t); });
+  return Object.entries(map).sort((a,b)=>b[0].localeCompare(a[0]));
+}
+
+function renderTxnList(type, containerId, totalId, summaryId, cats) {
+  const txns = getTxns(type, cy, cm);
+  const listEl = ge(containerId);
+
+  if (!txns.length) {
+    listEl.innerHTML=`<div style="font-size:12px;color:rgba(255,255,255,.3);text-align:center;padding:30px 0;">ยังไม่มีรายการ — ใส่รายการด้านบนแล้วกด "+ เพิ่ม"</div>`;
+  } else {
+    const groups = groupByDate(txns);
+    listEl.innerHTML = groups.map(([date, txnList])=>{
+      const dayTotal = txnList.reduce((s,t)=>s+(+t.amount||0),0);
+      const dayColor = type==='income'?'#22c55e':'#ef4444';
+      return `
+        <div class="date-group-hdr">
+          <span>📅 ${fmtDateTH(date)}</span>
+          <span style="color:${dayColor};font-weight:700;">${fmtFull(dayTotal)}</span>
+        </div>
+        ${txnList.map(t=>{
+          const cat=getCat(type,t.category);
+          return `<div class="txn-row">
+            <div class="txn-icon" style="background:${cat.color}22;">${cat.icon}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:500;">${cat.label}</div>
+              ${t.note?`<div style="font-size:11px;color:rgba(255,255,255,.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.note}</div>`:''}
+            </div>
+            <div style="font-size:14px;font-weight:700;color:${cat.color};flex-shrink:0;">${fmtFull(t.amount)}</div>
+            <button class="btn-red" onclick="delTxn(${t.id})">ลบ</button>
+          </div>`;
+        }).join('')}`;
+    }).join('');
+  }
+
+  // Summary by category
+  const total = txns.reduce((s,t)=>s+(+t.amount||0),0);
+  const bycat = {};
+  txns.forEach(t=>{ bycat[t.category]=(bycat[t.category]||0)+(+t.amount||0); });
+  const sumEl = ge(summaryId);
+  const rows = cats.filter(c=>bycat[c.k]).map(c=>{
+    const v=bycat[c.k]||0, pct=total>0?v/total*100:0;
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span style="color:rgba(255,255,255,.7);">${c.icon} ${c.label}</span>
+        <span style="font-weight:600;color:${c.color};">${fmtFull(v)}</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:${c.color};"></div></div>
+    </div>`;
+  });
+  sumEl.innerHTML = rows.length ? rows.join('') : '<div style="font-size:12px;color:rgba(255,255,255,.3);">ยังไม่มีข้อมูล</div>';
+
+  const totEl = ge(totalId);
+  totEl.textContent = fmtFull(total);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════════════════
+let barInst=null, pieInst=null;
+function renderBarChart() {
+  const labels=[],inc=[],exp=[];
+  for(let i=5;i>=0;i--){
+    let m=cm-i,y=cy; if(m<0){m+=12;y--;}
+    labels.push(MONTHS[m].slice(0,3));
+    inc.push(totalInc(y,m)); exp.push(totalExp(y,m));
+  }
+  const ctx=ge('barChart'); if(!ctx) return;
+  if(barInst) barInst.destroy();
+  barInst=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'รายรับ',data:inc,backgroundColor:'rgba(34,197,94,.5)',borderColor:'#22c55e',borderWidth:1,borderRadius:5},
+      {label:'รายจ่าย',data:exp,backgroundColor:'rgba(239,68,68,.5)',borderColor:'#ef4444',borderWidth:1,borderRadius:5},
+    ]},
+    options:{responsive:true,plugins:{legend:{labels:{color:'rgba(255,255,255,.5)',font:{size:11}}}},
+      scales:{x:{ticks:{color:'rgba(255,255,255,.4)',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
+              y:{ticks:{color:'rgba(255,255,255,.4)',font:{size:10},callback:v=>'฿'+(v/1000).toFixed(0)+'k'},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+}
+function renderPieChart() {
+  const txns=getTxns('expense',cy,cm);
+  const bycat={};
+  txns.forEach(t=>{ bycat[t.category]=(bycat[t.category]||0)+(+t.amount||0); });
+  const cats=EXP_CATS.filter(c=>bycat[c.k]);
+  const ctx=ge('pieChart'); if(!ctx) return;
+  if(pieInst) pieInst.destroy();
+  const leg=ge('pie-leg');
+  if(!cats.length){ctx.style.display='none';leg.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:14px 0;">ยังไม่มีข้อมูล</div>';return;}
+  ctx.style.display='block';
+  const total=cats.reduce((s,c)=>s+(bycat[c.k]||0),0);
+  pieInst=new Chart(ctx,{type:'doughnut',
+    data:{labels:cats.map(c=>c.label),datasets:[{data:cats.map(c=>bycat[c.k]||0),backgroundColor:cats.map(c=>c.color+'aa'),borderColor:cats.map(c=>c.color),borderWidth:1}]},
+    options:{responsive:true,plugins:{legend:{display:false}},cutout:'62%'}
+  });
+  leg.innerHTML=cats.slice(0,6).map(c=>`
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.6);margin-bottom:3px;">
+      <span><span style="color:${c.color}">■</span> ${c.label}</span>
+      <span>${((bycat[c.k]||0)/total*100).toFixed(0)}%</span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+function renderDash() {
+  const inc=totalInc(), exp=totalExp(), sav=inc-exp;
+  const savPct=inc>0?sav/inc*100:0;
+  const incTxns=getTxns('income',cy,cm), expTxns=getTxns('expense',cy,cm);
+  const taxR=calcTax(ytdInc());
+
+  st('kpi-i',fmt(inc),'#22c55e'); ge('kpi-i2').textContent=incTxns.length+' รายการ';
+  st('kpi-e',fmt(exp),'#ef4444'); ge('kpi-e2').textContent=expTxns.length+' รายการ';
+  st('kpi-s',fmt(sav),sav>=0?'#22c55e':'#ef4444'); ge('kpi-s2').textContent=savPct.toFixed(1)+'% savings rate';
+  st('kpi-t',fmt(taxR.tax),'#a855f7'); ge('kpi-t2').textContent=taxR.effRate.toFixed(1)+'% effective rate';
+
+  const yi=ytdInc(),ye=ytdExp(),ys=yi-ye;
+  st('ytd-i',fmt(yi),'#22c55e'); st('ytd-e',fmt(ye),'#ef4444');
+  st('ytd-s',fmt(ys),ys>=0?'#22c55e':'#ef4444');
+  st('ytd-t',fmt(taxR.tax),'#a855f7');
+  const net=ys-taxR.tax; st('ytd-net',fmt(net),net>=0?'#22c55e':'#ef4444');
+
+  // Portfolio card
+  const invs=D.investments;
+  const portEl=ge('d-port');
+  if(!invs.length){portEl.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,.3);">ยังไม่มีรายการ</div>';}
+  else{
+    const cost=invs.reduce((s,i)=>s+(+i.cost||0),0),value=invs.reduce((s,i)=>s+(+i.value||0),0),pnl=value-cost,ret=cost>0?pnl/cost*100:0;
+    portEl.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">มูลค่าพอร์ต</span><b style="color:#3b82f6">${fmt(value)}</b></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">กำไร/ขาดทุน</span><b style="color:${pnl>=0?'#22c55e':'#ef4444'}">${fmt(pnl)}</b></div>
+        <div style="display:flex;justify-content:space-between;"><span style="color:rgba(255,255,255,.55);">ผลตอบแทน</span><b style="color:${ret>=0?'#22c55e':'#ef4444'}">${fmtPct(ret)}</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07);"><span style="color:rgba(255,255,255,.55);">จำนวนรายการ</span><span>${invs.length} รายการ</span></div>
+      </div>`;
+  }
+  renderBarChart(); renderPieChart();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INCOME
+// ═══════════════════════════════════════════════════════════
+function renderIncome() {
+  // Populate category select
+  const sel=ge('iadd-cat');
+  if(!sel.options.length) {
+    INC_CATS.forEach(c=>{ const o=new Option(`${c.icon} ${c.label}`,c.k); sel.add(o); });
+  }
+  // Default date to today if empty
+  if(!ge('iadd-date').value) ge('iadd-date').value=todayISO();
+  renderTxnList('income','inc-list','inc-tot','inc-sum',INC_CATS);
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPENSES
+// ═══════════════════════════════════════════════════════════
+function renderExpenses() {
+  const sel=ge('eadd-cat');
+  if(!sel.options.length) {
+    EXP_CATS.forEach(c=>{ const o=new Option(`${c.icon} ${c.label}`,c.k); sel.add(o); });
+  }
+  if(!ge('eadd-date').value) ge('eadd-date').value=todayISO();
+  renderTxnList('expense','exp-list','exp-tot','exp-sum',EXP_CATS);
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAX
+// ═══════════════════════════════════════════════════════════
+function renderTax() {
+  const gross=ytdInc();
+  const rows=[];
+  for(let m=0;m<12;m++){
+    const v=totalInc(cy,m);
+    if(v>0) rows.push(`<div style="display:flex;justify-content:space-between;color:rgba(255,255,255,.6);">
+      <span>${MONTHS[m].slice(0,3)}</span><span>${fmtFull(v)}</span></div>`);
+  }
+  ge('tax-inc-detail').innerHTML=rows.length?rows.join(''):'<div style="font-size:12px;color:rgba(255,255,255,.3);">ยังไม่มีข้อมูลรายรับ</div>';
+  st('tax-gross',fmtFull(gross),'#22c55e');
+  ge('auto-emp').textContent=fmtFull(Math.min(gross*.5,100000));
+
+  ge('ded-form').innerHTML=DED_FIELDS.map(f=>`
+    <div>
+      <label style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="font-weight:500;color:rgba(255,255,255,.75);">${f.label}</span>
+        <span style="color:rgba(255,255,255,.3);">${f.sub}</span>
+      </label>
+      <input type="number" min="0" value="${D.deductions[f.k]||''}" placeholder="0"
+        oninput="setDed('${f.k}',this.value)">
+    </div>`).join('');
+  refreshTax(gross);
+}
+function setDed(k,v){ D.deductions[k]=+v||0; saveD(); refreshTax(ytdInc()); }
+function refreshTax(gross) {
+  const r=calcTax(gross);
+  ge('tax-steps').innerHTML=[
+    ['รายรับรวม (Gross)',       fmtFull(r.gross),    '#22c55e', false],
+    ['ค่าใช้จ่าย 50%',          '-'+fmtFull(r.empDed),'#f59e0b', false],
+    ['ค่าลดหย่อนส่วนตัว',      '-฿60,000',           '#f59e0b', false],
+    ['ประกันสังคม',             r.social>0?'-'+fmtFull(r.social):'-','#f59e0b',false],
+    ['ประกันชีวิต+สุขภาพ',     r.lifeHlth>0?'-'+fmtFull(r.lifeHlth):'-','#f59e0b',false],
+    ['ประกันสุขภาพบิดามารดา', r.parentIns>0?'-'+fmtFull(r.parentIns):'-','#f59e0b',false],
+    ['SSF + RMF',               r.ssfRmf>0?'-'+fmtFull(r.ssfRmf):'-','#f59e0b',false],
+    ['ดอกเบี้ยบ้าน',            r.mortgage>0?'-'+fmtFull(r.mortgage):'-','#f59e0b',false],
+    ['เงินบริจาค (2×)',          r.donDed>0?'-'+fmtFull(r.donDed):'-','#f59e0b',false],
+    ['ค่าลดหย่อนรวม',           '-'+fmtFull(r.totalDed),'#f59e0b',true],
+    ['เงินได้สุทธิ',             fmtFull(r.taxable),'#fff',true],
+  ].map(([l,v,c,b])=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;${b?'font-weight:700;':''}">
+      <span style="color:rgba(255,255,255,${b?.85:.5});">${l}</span><span style="color:${c};">${v}</span>
+    </div>`).join('');
+  st('tax-amt',fmtFull(r.tax),'#a855f7');
+  ge('tax-eff').textContent='Effective rate: '+r.effRate.toFixed(2)+'%';
+  ge('tax-mth').textContent='เฉลี่ยต่อเดือน: '+fmtFull(r.tax/12);
+  const BLBL=['0–150k','150–300k','300–500k','500–750k','750k–1M','1M–2M','2M–5M','5M+'];
+  ge('brackets').innerHTML=r.bkd.map((b,i)=>{
+    const on=b.amt>0,pct=on?Math.min(b.amt/50000*10,100):0;
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:12px;opacity:${on?1:.3};">
+      <span style="width:72px;color:rgba(255,255,255,.5);flex-shrink:0;">${BLBL[i]}</span>
+      <span style="width:28px;color:#a855f7;flex-shrink:0;">${(b.rate*100).toFixed(0)}%</span>
+      <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:#a855f7;border-radius:2px;"></div>
+      </div>
+      <span style="width:72px;text-align:right;color:${on?'#a855f7':'rgba(255,255,255,.3)'};">${on?fmtFull(b.tax):'-'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INVESTMENTS
+// ═══════════════════════════════════════════════════════════
+function toggleAddInv(){ const f=ge('add-inv'); f.style.display=f.style.display==='none'?'block':'none'; }
+function addInv(){
+  const name=ge('inv-n').value.trim(),type=ge('inv-t').value,cost=+ge('inv-c').value||0,value=+ge('inv-v').value||0;
+  if(!name){alert('กรุณาใส่ชื่อ');return;}
+  D.investments.push({id:Date.now(),name,type,cost,value,date:todayISO()});
+  saveD(); ge('inv-n').value=''; ge('inv-c').value=''; ge('inv-v').value='';
+  ge('add-inv').style.display='none'; renderInvest();
+}
+function updInvVal(id,v){ const i=D.investments.find(x=>x.id===id); if(i){i.value=+v||0;saveD();refreshInvStats();} }
+function delInv(id){ if(!confirm('ลบรายการนี้?'))return; D.investments=D.investments.filter(i=>i.id!==id); saveD(); renderInvest(); }
+function refreshInvStats(){
+  const invs=D.investments;
+  const cost=invs.reduce((s,i)=>s+(+i.cost||0),0),value=invs.reduce((s,i)=>s+(+i.value||0),0);
+  const pnl=value-cost,ret=cost>0?pnl/cost*100:0;
+  st('pv',fmt(value),'#3b82f6'); st('ppnl',fmt(pnl),pnl>=0?'#22c55e':'#ef4444');
+  st('pret',fmtPct(ret),ret>=0?'#22c55e':'#ef4444'); ge('pcost').textContent=fmt(cost);
+}
+function renderInvest(){
+  refreshInvStats();
+  const invs=D.investments;
+  if(!invs.length){ge('inv-list').innerHTML='<div style="font-size:13px;color:rgba(255,255,255,.3);text-align:center;padding:36px 0;">ยังไม่มีรายการ — กด "+ เพิ่มการลงทุน"</div>';return;}
+  ge('inv-list').innerHTML=`<div style="overflow-x:auto;">
+    <table class="tbl" style="width:100%;border-collapse:collapse;">
+      <thead><tr><th>ชื่อ</th><th>ประเภท</th><th style="text-align:right">ต้นทุน</th><th style="text-align:right">มูลค่าปัจจุบัน</th><th style="text-align:right">กำไร/ขาดทุน</th><th style="text-align:right" class="hide-sm">ผลตอบแทน</th><th></th></tr></thead>
+      <tbody>${invs.map(inv=>{
+        const pnl=(+inv.value||0)-(+inv.cost||0),ret=inv.cost>0?pnl/inv.cost*100:0,t=INV_TYPES[inv.type]||INV_TYPES.other;
+        return `<tr>
+          <td style="font-size:13px;font-weight:500;">${inv.name}</td>
+          <td><span class="badge" style="background:${t.color}22;color:${t.color};">${t.label}</span></td>
+          <td style="text-align:right;font-size:13px;color:rgba(255,255,255,.5);">${fmtFull(inv.cost)}</td>
+          <td style="text-align:right;"><input type="number" value="${inv.value||''}" min="0"
+            style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:6px;padding:4px 8px;width:110px;font-size:12px;text-align:right;"
+            oninput="updInvVal(${inv.id},this.value)"></td>
+          <td style="text-align:right;font-size:13px;font-weight:600;color:${pnl>=0?'#22c55e':'#ef4444'};">${fmtFull(pnl)}</td>
+          <td style="text-align:right;font-size:13px;color:${ret>=0?'#22c55e':'#ef4444'};" class="hide-sm">${fmtPct(ret)}</td>
+          <td style="text-align:right;"><button class="btn-red" onclick="delInv(${inv.id})">ลบ</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLOUD SYNC — JSONBin.io
+// ═══════════════════════════════════════════════════════════
+let cloudCfg = { binId:'', apiKey:'' };
+let syncState = 'local'; // 'local' | 'syncing' | 'ok' | 'error'
+
+function loadCloudCfg() {
+  try {
+    const s = localStorage.getItem('totoCfg');
+    if (s) cloudCfg = JSON.parse(s);
+  } catch(e) {}
+}
+function saveCloudCfg() {
+  localStorage.setItem('totoCfg', JSON.stringify(cloudCfg));
+}
+
+function setSyncState(state, detail) {
+  syncState = state;
+  const colors = { local:'#64748b', syncing:'#f59e0b', ok:'#22c55e', error:'#ef4444' };
+  const labels = { local:'Local only', syncing:'กำลัง sync...', ok:'Synced ✓', error:'Sync ผิดพลาด' };
+  const c = colors[state];
+  const dot = ge('sync-dot'), lbl = ge('sync-label');
+  if (dot) { dot.style.background = c; dot.title = labels[state]; }
+  if (lbl) { lbl.textContent = labels[state]; lbl.style.color = c; }
+  const bigDot = ge('status-dot-big'), txt = ge('status-text');
+  if (bigDot) bigDot.style.background = c;
+  if (txt) txt.textContent = labels[state];
+  if (ge('status-detail') && detail) ge('status-detail').textContent = detail;
+}
+
+function hasCloud() { return cloudCfg.binId && cloudCfg.apiKey; }
+
+async function pushToCloud() {
+  if (!hasCloud()) return;
+  setSyncState('syncing');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'X-Master-Key': cloudCfg.apiKey },
+      body: JSON.stringify(D)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    setSyncState('ok', 'BIN ID: ' + cloudCfg.binId);
+    const now = new Date().toLocaleTimeString('th-TH');
+    if (ge('last-sync-time')) ge('last-sync-time').textContent = now;
+  } catch(e) {
+    setSyncState('error', 'Error: ' + e.message + '\nตรวจสอบ BIN ID และ API Key อีกครั้ง');
+  }
+}
+
+async function pullFromCloud() {
+  if (!hasCloud()) return;
+  setSyncState('syncing');
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${cloudCfg.binId}/latest`, {
+      headers: { 'X-Master-Key': cloudCfg.apiKey }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.record && json.record.transactions !== undefined) {
+      D = json.record;
+      localStorage.setItem('totoFin2', JSON.stringify(D));
+    }
+    setSyncState('ok', 'BIN ID: ' + cloudCfg.binId);
+    const now = new Date().toLocaleTimeString('th-TH');
+    if (ge('last-sync-time')) ge('last-sync-time').textContent = now;
+    render();
+  } catch(e) {
+    setSyncState('error', 'Error: ' + e.message + '\nตรวจสอบ BIN ID และ API Key อีกครั้ง');
+  }
+}
+
+async function connectSync() {
+  const binId  = ge('cfg-binid').value.trim();
+  const apiKey = ge('cfg-apikey').value.trim();
+  if (!binId || !apiKey) { alert('กรุณาใส่ BIN ID และ API Key'); return; }
+  cloudCfg = { binId, apiKey };
+  saveCloudCfg();
+  await pullFromCloud();
+  if (syncState === 'ok') {
+    alert('✅ เชื่อมต่อสำเร็จ! ข้อมูลถูก sync แล้ว');
+    render();
+  }
+}
+
+async function forcePull() {
+  if (!hasCloud()) { alert('ยังไม่ได้ตั้งค่า BIN ID และ API Key'); return; }
+  await pullFromCloud();
+  alert(syncState === 'ok' ? '✅ Pull สำเร็จ' : '❌ Pull ผิดพลาด');
+}
+
+async function forcePush() {
+  if (!hasCloud()) { alert('ยังไม่ได้ตั้งค่า BIN ID และ API Key'); return; }
+  await pushToCloud();
+  alert(syncState === 'ok' ? '✅ Push สำเร็จ' : '❌ Push ผิดพลาด');
+}
+
+function disconnectSync() {
+  if (!confirm('ยกเลิก Sync? ข้อมูลใน Cloud จะยังอยู่ แต่จะหยุด sync')) return;
+  cloudCfg = { binId:'', apiKey:'' };
+  saveCloudCfg();
+  setSyncState('local', '');
+  if (ge('cfg-binid'))  ge('cfg-binid').value  = '';
+  if (ge('cfg-apikey')) ge('cfg-apikey').value = '';
+}
+
+// Export / Import
+function exportData() {
+  const blob = new Blob([JSON.stringify(D, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `toto-finance-${todayISO()}.json`;
+  a.click();
+}
+function importData(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.transactions) { alert('ไฟล์ไม่ถูกต้อง'); return; }
+      if (!confirm('Import จะแทนที่ข้อมูลปัจจุบัน — แน่ใจ?')) return;
+      D = imported;
+      saveD();
+      render();
+      alert('✅ Import สำเร็จ');
+    } catch(err) { alert('ไฟล์ผิดรูปแบบ: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════════
+// STORAGE (local + cloud)
+// ═══════════════════════════════════════════════════════════
+function loadD() {
+  try { const s = localStorage.getItem('totoFin2'); if (s) D = JSON.parse(s); } catch(e){}
+  D.transactions = D.transactions || [];
+  D.deductions   = D.deductions   || {};
+  D.investments  = D.investments  || [];
+  DED_FIELDS.forEach(f => { if (D.deductions[f.k]===undefined) D.deductions[f.k]=f.def; });
+}
+async function saveD() {
+  localStorage.setItem('totoFin2', JSON.stringify(D));
+  if (hasCloud()) await pushToCloud();
+}
+
+// Settings tab render
+function renderSettings() {
+  if (ge('cfg-binid')  && !ge('cfg-binid').value)  ge('cfg-binid').value  = cloudCfg.binId  || '';
+  if (ge('cfg-apikey') && !ge('cfg-apikey').value) ge('cfg-apikey').value = cloudCfg.apiKey || '';
+  if (hasCloud()) setSyncState(syncState, 'BIN ID: ' + cloudCfg.binId);
+  else setSyncState('local', 'กรอก BIN ID และ API Key แล้วกด Connect');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOM HELPERS
+// ═══════════════════════════════════════════════════════════
+function ge(id){ return document.getElementById(id); }
+function st(id,txt,color){ const e=ge(id); if(!e)return; e.textContent=txt; if(color)e.style.color=color; }
+
+// ═══════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════
+loadD();
+loadCloudCfg();
+updateLabels();
+renderDash();
+if (hasCloud()) {
+  setSyncState('syncing');
+  pullFromCloud();
+}
+</script>
+</body>
+</html>
